@@ -1,0 +1,6 @@
+ListenAddr: "0.0.0.0:53"
+Debug: true
+PublicDNS: "1.1.1.1:53"
+
+SSLPem: "./configs/s1.pem"
+SSLKey: "./configs/s1.key"

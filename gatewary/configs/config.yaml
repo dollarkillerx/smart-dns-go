@@ -3,5 +3,5 @@ CoreAddr: "0.0.0.0:8081"
 Debug: true
 PublicDNS: "223.5.5.5:53"
 
-SSLPem: "./configs/s1.key"
+SSLPem: "./configs/s1.pem"
 SSLAuth: "secp384r1"
