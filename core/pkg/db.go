@@ -6,13 +6,15 @@ type DNSNode struct {
 	ISP     string
 
 	Value string
-	TTL   int
+	TTL   uint32
+	Pref  uint16
 }
 
 // domain: type: id
 // id: location: value
 
 type IPS string
+
 const (
 	IPS_LT  IPS = "联通"
 	IPS_DX  IPS = "电信"
@@ -24,8 +26,8 @@ const (
 )
 
 type CITY string
+
 const (
 	CITY_GN CITY = "中国"
 	CITY_QT CITY = "0"
 )
-

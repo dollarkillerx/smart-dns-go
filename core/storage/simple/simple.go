@@ -3,7 +3,6 @@ package simple
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -81,7 +80,7 @@ func (s *simple) AnalysisDNS(domain string, dns *dnsmessage.Message, ip string) 
 	// check
 	var def []pkg.DNSNode
 	var tag []pkg.DNSNode
-	for _,v := range ls {
+	for _, v := range ls {
 		if v.Country == "Def" && v.ISP == "Def" {
 			def = append(def, v)
 			continue
@@ -98,17 +97,62 @@ func (s *simple) AnalysisDNS(domain string, dns *dnsmessage.Message, ip string) 
 		def = tag
 	}
 
+	result = dns
+	result.Response = true
+	result.RecursionAvailable = true
+	result.Additionals = []dnsmessage.Resource{}
+	result.Answers = []dnsmessage.Resource{}
 	switch dns.Questions[0].Type {
 	case dnsmessage.TypeA:
-
+		for _, v := range def {
+			result.Answers = append(result.Answers, dnsmessage.Resource{
+				Header: dnsmessage.ResourceHeader{
+					Name:  dnsmessage.MustNewName(domain),
+					Type:  dnsmessage.TypeA,
+					Class: dnsmessage.ClassINET,
+					TTL:   v.TTL,
+				},
+				Body: &dnsmessage.AResource{A: [4]byte{46, 82, 174, 69}},
+			})
+		}
 	case dnsmessage.TypeAAAA:
 
 	case dnsmessage.TypeCNAME:
-
+		for _, v := range def {
+			result.Answers = append(result.Answers, dnsmessage.Resource{
+				Header: dnsmessage.ResourceHeader{
+					Name:  dnsmessage.MustNewName(domain),
+					Type:  dnsmessage.TypeCNAME,
+					Class: dnsmessage.ClassINET,
+					TTL:   v.TTL,
+				},
+				Body: &dnsmessage.CNAMEResource{CNAME: dnsmessage.MustNewName(v.Value)},
+			})
+		}
 	case dnsmessage.TypeTXT:
-
+		for _, v := range def {
+			result.Answers = append(result.Answers, dnsmessage.Resource{
+				Header: dnsmessage.ResourceHeader{
+					Name:  dnsmessage.MustNewName(domain),
+					Type:  dnsmessage.TypeTXT,
+					Class: dnsmessage.ClassINET,
+					TTL:   v.TTL,
+				},
+				Body: &dnsmessage.TXTResource{TXT: []string{v.Value}},
+			})
+		}
 	case dnsmessage.TypeMX:
-
+		for _, v := range def {
+			result.Answers = append(result.Answers, dnsmessage.Resource{
+				Header: dnsmessage.ResourceHeader{
+					Name:  dnsmessage.MustNewName(domain),
+					Type:  dnsmessage.TypeMX,
+					Class: dnsmessage.ClassINET,
+					TTL:   v.TTL,
+				},
+				Body: &dnsmessage.MXResource{Pref: v.Pref, MX: dnsmessage.MustNewName(v.Value)},
+			})
+		}
 	}
 }
 

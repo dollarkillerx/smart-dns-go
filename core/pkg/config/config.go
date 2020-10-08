@@ -11,7 +11,7 @@ type config struct {
 	ListenAddr string `json:"listen_addr" yaml:"ListenAddr"`
 	Debug      bool   `json:"debug" yaml:"Debug"`
 	PublicDNS  string `json:"public_dns" yaml:"PublicDNS"`
-	IPAddr string `json:"ip_addr" yaml:"IPAddr"`
+	IPAddr     string `json:"ip_addr" yaml:"IPAddr"`
 
 	// Auth
 	SSLPem   string `json:"pem" yaml:"SSLPem"`

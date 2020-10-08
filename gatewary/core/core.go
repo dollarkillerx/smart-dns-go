@@ -63,6 +63,8 @@ func (c *Core) coreDnsServer(conn *net.UDPConn, addr *net.UDPAddr, data []byte) 
 		log.Println(err)
 		return
 	}
+
+	log.Println(msg.GoString())
 	if len(msg.Questions) != 1 {
 		dns, err := c.publicDNS(data)
 		if err != nil {
@@ -79,7 +81,8 @@ func (c *Core) coreDnsServer(conn *net.UDPConn, addr *net.UDPAddr, data []byte) 
 		log.Println(err)
 		return
 	}
-	log.Println(dns.Answers[0].GoString())
+	log.Println(dns.GoString())
+	log.Println(len(dns.Answers))
 	log.Println(addr.String())
 	//marshal, err := json.Marshal(dns)
 	//if err != nil {
