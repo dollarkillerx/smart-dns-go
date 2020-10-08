@@ -1,21 +1,39 @@
 package core
 
 import (
-	"encoding/json"
+	"github.com/dollarkillerx/smart-dns-go/generate/gatewary"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"log"
 	"net"
 	"time"
 
-	"github.com/dollarkillerx/smart-dns-go/gatewary/define"
+	"github.com/dollarkillerx/smart-dns-go/gatewary/pkg/config"
 	"golang.org/x/net/dns/dnsmessage"
 )
 
-type Core struct{
+type Core struct {
+	core gatewary.GatewaryServiceClient
+}
 
+func NewCore() *Core {
+	creds, err := credentials.NewClientTLSFromFile(config.BaseConfig.SSLPem, config.BaseConfig.SSLAuth)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	dial, err := grpc.Dial(config.BaseConfig.CoreAddr, grpc.WithTransportCredentials(creds))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return &Core{
+		core: gatewary.NewGatewaryServiceClient(dial),
+	}
 }
 
 func (c *Core) Core() error {
-	addr, err := net.ResolveUDPAddr("udp", define.BaseConfig.ListenAddr)
+	addr, err := net.ResolveUDPAddr("udp", config.BaseConfig.ListenAddr)
 	if err != nil {
 		log.Fatalln("Can't resolve address: ", err)
 	}
@@ -61,13 +79,14 @@ func (c *Core) coreDnsServer(conn *net.UDPConn, addr *net.UDPAddr, data []byte) 
 		log.Println(err)
 		return
 	}
+	log.Println(dns.Answers[0].GoString())
 	log.Println(addr.String())
-	marshal, err := json.Marshal(dns)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	log.Println(string(marshal))
+	//marshal, err := json.Marshal(dns)
+	//if err != nil {
+	//	log.Println(err)
+	//	return
+	//}
+	//log.Println(string(marshal))
 	c.respDNS(conn, addr, dns)
 	return
 
@@ -89,7 +108,7 @@ func (c *Core) coreDnsServer(conn *net.UDPConn, addr *net.UDPAddr, data []byte) 
 }
 
 func (c *Core) publicDNS(msg []byte) (*dnsmessage.Message, error) {
-	dial, err := net.Dial("udp", define.BaseConfig.PublicDNS)
+	dial, err := net.Dial("udp", config.BaseConfig.PublicDNS)
 	if err != nil {
 		log.Println(err)
 		return nil, err

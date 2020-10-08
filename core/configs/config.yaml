@@ -1,6 +1,8 @@
-ListenAddr: "0.0.0.0:53"
+ListenAddr: "0.0.0.0:8081"
 Debug: true
-PublicDNS: "1.1.1.1:53"
+PublicDNS: "223.5.5.5:53"
+RedisUri: "127.0.0.1:6379"
+RedisKey: ""
 
 SSLPem: "./configs/s1.pem"
 SSLKey: "./configs/s1.key"

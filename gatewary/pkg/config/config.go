@@ -1,4 +1,4 @@
-package define
+package config
 
 import (
 	"io/ioutil"
@@ -11,7 +11,7 @@ type config struct {
 	ListenAddr string `json:"listen_addr" yaml:"ListenAddr"`
 	CoreAddr   string `json:"core_addr" yaml:"CoreAddr"`
 	Debug      bool   `json:"debug" yaml:"Debug"`
-	PublicDNS string `json:"public_dns" yaml:"PublicDNS"`
+	PublicDNS  string `json:"public_dns" yaml:"PublicDNS"`
 
 	// Auth
 	SSLPem  string `json:"pem" yaml:"SSLPem"`
@@ -25,7 +25,7 @@ func initBase() *config {
 	if err != nil {
 		if err := ioutil.WriteFile("./gatewary/configs/config.yaml", []byte(cfp), 00666); err != nil {
 			log.Fatalln(err)
-		}else {
+		} else {
 			log.Fatalln("Please fill out the profile")
 		}
 	}
@@ -40,7 +40,7 @@ const cfp = `
 ListenAddr: "0.0.0.0:53"
 CoreAddr: "0.0.0.0:8081"
 Debug: true
-PublicDNS: "1.1.1.1:53"
+PublicDNS: "8.8.8.8:53"
 
 SSLPem: "./configs/s1.key"
 SSLAuth: "key_password"
