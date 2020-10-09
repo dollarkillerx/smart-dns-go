@@ -3,11 +3,11 @@ package gatewray;
 option go_package = ".;gatewary";
 
 message DnsRequest {
-    string message = 1; // dns报文
+    bytes message = 1; // dns报文
     string ip = 2;      // 对方IP
 }
 message DnsResponse {
-    string message = 1; // response dns报文
+    bytes message = 1; // response dns报文
 }
 
 service GatewaryService {

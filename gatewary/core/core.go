@@ -1,21 +1,55 @@
 package core
 
 import (
-	"encoding/json"
+	"context"
 	"log"
 	"net"
+	"strings"
 	"time"
 
-	"github.com/dollarkillerx/smart-dns-go/gatewary/define"
+	"github.com/dollarkillerx/smart-dns-go/gatewary/pkg/config"
+	"github.com/dollarkillerx/smart-dns-go/generate/gatewary"
 	"golang.org/x/net/dns/dnsmessage"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
-type Core struct{
-
+type Core struct {
+	core gatewary.GatewaryServiceClient
 }
 
+func NewCore() *Core {
+	var opts []grpc.DialOption
+	creds, err := credentials.NewClientTLSFromFile(config.BaseConfig.SSLPem, "smart_dns_core")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	opts = append(opts, grpc.WithTransportCredentials(creds))
+	//opts = append(opts, grpc.WithPerRPCCredentials(&customCredential{}))
+	dial, err := grpc.Dial(config.BaseConfig.CoreAddr, opts...)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return &Core{
+		core: gatewary.NewGatewaryServiceClient(dial),
+	}
+}
+
+//// customCredential自定义认证
+//type customCredential struct{}
+//func (c *customCredential) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+//	return map[string]string{
+//		"appid":  "0001",
+//		"appkey": "key",
+//	}, nil
+//}
+//func (c *customCredential) RequireTransportSecurity() bool {
+//	return true
+//}
+
 func (c *Core) Core() error {
-	addr, err := net.ResolveUDPAddr("udp", define.BaseConfig.ListenAddr)
+	addr, err := net.ResolveUDPAddr("udp", config.BaseConfig.ListenAddr)
 	if err != nil {
 		log.Fatalln("Can't resolve address: ", err)
 	}
@@ -45,6 +79,8 @@ func (c *Core) coreDnsServer(conn *net.UDPConn, addr *net.UDPAddr, data []byte) 
 		log.Println(err)
 		return
 	}
+
+	//log.Println(msg.GoString())
 	if len(msg.Questions) != 1 {
 		dns, err := c.publicDNS(data)
 		if err != nil {
@@ -56,40 +92,43 @@ func (c *Core) coreDnsServer(conn *net.UDPConn, addr *net.UDPAddr, data []byte) 
 		return
 	}
 
+	dnsMsg, err := msg.Pack()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	//var bm dnsmessage.Message
+	switch msg.Questions[0].Type {
+	case dnsmessage.TypeA:
+		if err := c.PSend(dnsMsg, conn, addr); err == nil {
+			return
+		}
+	case dnsmessage.TypeCNAME:
+		if err := c.PSend(dnsMsg, conn, addr); err == nil {
+			return
+		}
+	case dnsmessage.TypeMX:
+		if err := c.PSend(dnsMsg, conn, addr); err == nil {
+			return
+		}
+	case dnsmessage.TypeTXT:
+		if err := c.PSend(dnsMsg, conn, addr); err == nil {
+			return
+		}
+	}
+
 	dns, err := c.publicDNS(data)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	log.Println(addr.String())
-	marshal, err := json.Marshal(dns)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	log.Println(string(marshal))
+
 	c.respDNS(conn, addr, dns)
-	return
-
-	switch msg.Questions[0].Type {
-	case dnsmessage.TypeA:
-
-	case dnsmessage.TypeCNAME:
-
-	case dnsmessage.TypeMX:
-
-	case dnsmessage.TypeTXT:
-
-	case dnsmessage.TypeAAAA:
-
-	default:
-
-	}
-
 }
 
 func (c *Core) publicDNS(msg []byte) (*dnsmessage.Message, error) {
-	dial, err := net.Dial("udp", define.BaseConfig.PublicDNS)
+	dial, err := net.Dial("udp", config.BaseConfig.PublicDNS)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -124,6 +163,28 @@ func (c *Core) respDNS(conn *net.UDPConn, addr *net.UDPAddr, data *dnsmessage.Me
 		log.Println(err)
 		return
 	}
+	if _, err := conn.WriteToUDP(pack, addr); err != nil {
+		log.Println(err)
+	}
+}
+
+func (c *Core) PSend(dnsMsg []byte, conn *net.UDPConn, addr *net.UDPAddr) error {
+	lookup, err := c.core.DNSLookup(context.TODO(), &gatewary.DnsRequest{
+		Message: dnsMsg,
+		Ip:      addr.String(),
+	})
+	if err != nil {
+		if strings.Index(err.Error(),"nil returned") != -1 {
+			return err
+		}
+		log.Println(err)
+		return err
+	}
+	c.respDNSMsg(conn,addr,lookup.Message)
+	return nil
+}
+
+func (c *Core) respDNSMsg(conn *net.UDPConn, addr *net.UDPAddr, pack []byte) {
 	if _, err := conn.WriteToUDP(pack, addr); err != nil {
 		log.Println(err)
 	}
