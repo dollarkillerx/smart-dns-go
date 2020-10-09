@@ -1,12 +1,14 @@
 package smart_dns_go
 
 import (
-	"github.com/gomodule/redigo/redis"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gomodule/redigo/redis"
 )
 
 func TestP(t *testing.T) {
@@ -76,20 +78,24 @@ func newRedisPool() *redis.Pool {
 	}
 }
 
-
 func TestJm(t *testing.T) {
 	p := "135.4.5.6"
-	split := strings.Split(p, ".")
-	log.Println(split)
+	log.Println(ParseIP(p))
+}
 
+func ParseIP(p string) ([4]byte, error) {
+	split := strings.Split(p, ".")
+	if len(split) != 4 {
+		return [4]byte{}, fmt.Errorf("not ep")
+	}
 	cp := [4]byte{}
-	for i,v := range split {
+	for i, v := range split {
 		atoi, err := strconv.Atoi(v)
 		if err != nil {
-			log.Fatalln(err)
+			return [4]byte{}, err
 		}
 		cp[i] = uint8(atoi)
 	}
 
-	log.Println(cp)
+	return cp, nil
 }

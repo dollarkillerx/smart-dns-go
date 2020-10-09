@@ -1,15 +1,15 @@
 package core
 
 import (
-	"github.com/dollarkillerx/smart-dns-go/generate/gatewary"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"log"
 	"net"
 	"time"
 
 	"github.com/dollarkillerx/smart-dns-go/gatewary/pkg/config"
+	"github.com/dollarkillerx/smart-dns-go/generate/gatewary"
 	"golang.org/x/net/dns/dnsmessage"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type Core struct {
