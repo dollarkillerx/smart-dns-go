@@ -10,6 +10,7 @@ import (
 
 	"github.com/dollarkillerx/smart-dns-go/core/pkg"
 	"github.com/dollarkillerx/smart-dns-go/core/pkg/config"
+	"github.com/dollarkillerx/smart-dns-go/utils"
 	"github.com/dollarkillerx/smart-dns-ip/generate/smart_dns_ip"
 	"github.com/gomodule/redigo/redis"
 	"golang.org/x/net/dns/dnsmessage"
@@ -46,7 +47,6 @@ func (s *simple) AnalysisDNS(domain string, dns *dnsmessage.Message, ip string) 
 
 	do, err := redis.String(conn.Do("HGET", domain, dns.Questions[0].Type.String()))
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	var ls []pkg.DNSNode
@@ -67,13 +67,13 @@ func (s *simple) AnalysisDNS(domain string, dns *dnsmessage.Message, ip string) 
 	// sp
 	country := ""
 	if search.Country == "0" {
-		country = "Def"
+		country = pkg.CityDefault.String()
 	} else {
 		country = search.Country
 	}
 	isp := ""
 	if search.Isp == "0" {
-		isp = "Def"
+		isp = pkg.IpsDefault.String()
 	} else {
 		isp = search.Isp
 	}
@@ -81,7 +81,7 @@ func (s *simple) AnalysisDNS(domain string, dns *dnsmessage.Message, ip string) 
 	var def []pkg.DNSNode
 	var tag []pkg.DNSNode
 	for _, v := range ls {
-		if v.Country == "Def" && v.ISP == "Def" {
+		if v.Country == pkg.CityDefault.String() && v.ISP == pkg.IpsDefault.String() {
 			def = append(def, v)
 			continue
 		}
@@ -105,6 +105,11 @@ func (s *simple) AnalysisDNS(domain string, dns *dnsmessage.Message, ip string) 
 	switch dns.Questions[0].Type {
 	case dnsmessage.TypeA:
 		for _, v := range def {
+			parseIP, err := utils.ParseIP(v.Value)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 			result.Answers = append(result.Answers, dnsmessage.Resource{
 				Header: dnsmessage.ResourceHeader{
 					Name:  dnsmessage.MustNewName(domain),
@@ -112,7 +117,7 @@ func (s *simple) AnalysisDNS(domain string, dns *dnsmessage.Message, ip string) 
 					Class: dnsmessage.ClassINET,
 					TTL:   v.TTL,
 				},
-				Body: &dnsmessage.AResource{A: [4]byte{46, 82, 174, 69}},
+				Body: &dnsmessage.AResource{A: parseIP},
 			})
 		}
 	case dnsmessage.TypeAAAA:
@@ -154,6 +159,8 @@ func (s *simple) AnalysisDNS(domain string, dns *dnsmessage.Message, ip string) 
 			})
 		}
 	}
+
+	return result, nil
 }
 
 func newRedisPool() *redis.Pool {

@@ -41,11 +41,11 @@ func initBase() *config {
 const cfp = `
 ListenAddr: "0.0.0.0:8081"
 Debug: true
-PublicDNS: "8.8.8.8:53"
-RedisUri: "127.0.0.1:6379"
-RedisKey: ""
-IPAddr: "0.0.0.0:8086"
+PublicDNS: "223.5.5.5:53"
+IPAddr: "0.0.0.0:8087"
 
 SSLPem: "./configs/s1.pem"
 SSLKey: "./configs/s1.key"
+RedisUri: "127.0.0.1:6379"
+RedisKey: ""
 `

@@ -22,4 +22,3 @@ func ParseIP(p string) ([4]byte, error) {
 
 	return cp, nil
 }
-

@@ -16,18 +16,26 @@ type DNSNode struct {
 type IPS string
 
 const (
-	IPS_LT  IPS = "联通"
-	IPS_DX  IPS = "电信"
-	IPS_YD  IPS = "移动"
-	IPS_JY  IPS = "教育网"
-	IPS_TT  IPS = "铁通"
-	IPS_PBS IPS = "鹏博士"
-	IPS_QT  IPS = "0"
+	IpsLt      IPS = "联通"
+	IpsDx      IPS = "电信"
+	IpsYd      IPS = "移动"
+	IpsJy      IPS = "教育网"
+	IpsTt      IPS = "铁通"
+	IpsPbs     IPS = "鹏博士"
+	IpsDefault IPS = "0"
 )
+
+func (i IPS) String() string {
+	return string(i)
+}
 
 type CITY string
 
 const (
-	CITY_GN CITY = "中国"
-	CITY_QT CITY = "0"
+	CityGn      CITY = "中国"
+	CityDefault CITY = "0"
 )
+
+func (i CITY) String() string {
+	return string(i)
+}
