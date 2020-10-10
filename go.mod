@@ -12,4 +12,5 @@ require (
 	google.golang.org/grpc v1.32.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.3.0
+	gorm.io/gorm v1.20.2 // indirect
 )
