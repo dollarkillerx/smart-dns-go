@@ -24,7 +24,6 @@ func main() {
 	}
 }
 
-
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method

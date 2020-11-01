@@ -174,13 +174,13 @@ func (c *Core) PSend(dnsMsg []byte, conn *net.UDPConn, addr *net.UDPAddr) error 
 		Ip:      addr.String(),
 	})
 	if err != nil {
-		if strings.Index(err.Error(),"nil returned") != -1 {
+		if strings.Index(err.Error(), "nil returned") != -1 {
 			return err
 		}
 		log.Println(err)
 		return err
 	}
-	c.respDNSMsg(conn,addr,lookup.Message)
+	c.respDNSMsg(conn, addr, lookup.Message)
 	return nil
 }
 

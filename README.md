@@ -4,7 +4,7 @@ smart-dns-go  go version SmartDns 后端
 
 Smart DNS 不仅为域名解析系统 也可充当公共DNS服务器
 
-### 编译 傻逼GO1.5 
+### GO 1.5编译请注意证书
 ``` 
 export GODEBUG=x509ignoreCN=0
 ```

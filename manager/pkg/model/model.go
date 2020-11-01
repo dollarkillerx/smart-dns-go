@@ -6,12 +6,11 @@ import (
 )
 
 type Model struct {
-	ID        uint `gorm:"primarykey" json:"-"`
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	ID        uint           `gorm:"primarykey" json:"-"`
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
-
 
 type User struct {
 	Model

@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net"
-	"os"
 
 	"github.com/dollarkillerx/smart-dns-go/core/core"
 	"github.com/dollarkillerx/smart-dns-go/core/pkg/config"
@@ -17,9 +16,6 @@ func main() {
 		log.SetFlags(log.Llongfile | log.LstdFlags)
 	}
 
-	if err := os.Setenv("GODEBUG", "x509ignoreCN=0"); err != nil {
-		log.Fatalln(err)
-	}
 	log.Println("Listen Addr: ", config.BaseConfig.ListenAddr)
 
 	listen, err := net.Listen("tcp", config.BaseConfig.ListenAddr)
